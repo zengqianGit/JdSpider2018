@@ -91,12 +91,12 @@ class RandomUserAgentMiddlware(object):
         # print ("123")
 
 
-class RandomProxyMiddlware(object):
-    def process_request(self, request, spider):
-        get_ip = GetIP()
-        ip = get_ip.get_random_ip()
-        print (ip)
-        proxy_dict = {
-            "http": ip
-        }
-        request.meta["proxies"] = proxy_dict
+# class RandomProxyMiddlware(object):
+#     def process_request(self, request, spider):
+#         get_ip = GetIP()
+#         ip = get_ip.get_random_ip()
+#         print (ip)
+#         proxy_dict = {
+#             "http": ip
+#         }
+#         request.meta["proxies"] = proxy_dict
