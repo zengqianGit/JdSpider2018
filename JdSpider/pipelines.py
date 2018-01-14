@@ -40,6 +40,7 @@ class JdspiderPipeline(object):
 
     def do_insert(self, cursor, item):
         # 执行具体的插入
+        # print ("do_insert")
         insert_sql, params = item.get_insert_sql()
         cursor.execute(insert_sql, params)
         print ("cursor.execute(insert_sql, {0})".format(params))

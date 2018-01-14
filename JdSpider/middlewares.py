@@ -10,6 +10,7 @@ from scrapy.http import HtmlResponse
 import re
 import time
 from fake_useragent import UserAgent
+from JdSpider.tools.cixi_spider import GetIP
 
 
 class JdspiderSpiderMiddleware(object):
@@ -66,7 +67,7 @@ class JSPageMiddleware(object):
         match_obj = re.match("(.*item.jd.com/(\d+).html.*)", request.url)
         if match_obj:
             spider.browser.get(request.url)
-            time.sleep(2)
+            time.sleep(5)
             return HtmlResponse(url=spider.browser.current_url, body=spider.browser.page_source, encoding="utf8", request=request)
 
 
@@ -86,3 +87,16 @@ class RandomUserAgentMiddlware(object):
 
         # i = get_ua()
         request.headers.setdefault('User-agent', get_ua())
+        request.headers.setdefault('Connection', "close")
+        # print ("123")
+
+
+class RandomProxyMiddlware(object):
+    def process_request(self, request, spider):
+        get_ip = GetIP()
+        ip = get_ip.get_random_ip()
+        print (ip)
+        proxy_dict = {
+            "http": ip
+        }
+        request.meta["proxies"] = proxy_dict

@@ -6,7 +6,6 @@ from JdSpider.items import JDItemLoader, JdspiderItem
 import datetime
 from selenium import webdriver
 from JdSpider.settings import CHROME_DRIVER_PATH
-from JdSpider.settings import NOT_ALLOW_URL
 from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 
@@ -25,6 +24,8 @@ class JdSpiderSpider(scrapy.Spider):
         super(JdSpiderSpider, self).__init__()
         dispatcher.connect(self.spider_close, signals.spider_closed)
 
+        self.first = True
+
     def spider_close(self):
         # 当爬虫退出的时候关闭chrome
         self.browser.close()
@@ -35,7 +36,8 @@ class JdSpiderSpider(scrapy.Spider):
         2. 如果提取的url中格式为/item.jd.com/xxx 就狭隘之后直接进入解析函数
         """
         index_obj = re.match("(.*www.jd.com/(\d+).*)", response.url)
-        if index_obj:
+        if index_obj and self.first:
+            self.first = False
             all_urls = response.css(".cate_menu a::attr(href)").extract()
             all_urls = [parse.urljoin(response.url, url) for url in all_urls]
             for url in all_urls:
@@ -135,13 +137,13 @@ class JdSpiderSpider(scrapy.Spider):
                   + response.css("#p-ad::text").extract_first("")
         return summary
 
-    def not_allow_url(self, all_urls):
-        new_urls = list(all_urls)
-        for url in all_urls:
-            for nau in NOT_ALLOW_URL:
-                match_obj = re.match("(.*{0}.*)".format(nau), url)
-                if match_obj:
-                    new_urls.remove(url)
-                    break
-        new_urls = filter(lambda x: True if x.startswith("http") else False, new_urls)
-        return new_urls
+    # def not_allow_url(self, all_urls):
+    #     new_urls = list(all_urls)
+    #     for url in all_urls:
+    #         for nau in NOT_ALLOW_URL:
+    #             match_obj = re.match("(.*{0}.*)".format(nau), url)
+    #             if match_obj:
+    #                 new_urls.remove(url)
+    #                 break
+    #     new_urls = filter(lambda x: True if x.startswith("http") else False, new_urls)
+    #     return new_urls

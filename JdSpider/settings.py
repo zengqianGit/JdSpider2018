@@ -27,7 +27,7 @@ ROBOTSTXT_OBEY = False
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 5
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -53,8 +53,9 @@ COOKIES_ENABLED = False
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   'JdSpider.middlewares.JSPageMiddleware': 1,
+   'JdSpider.middlewares.JSPageMiddleware': 600,
    'JdSpider.middlewares.RandomUserAgentMiddlware': 500,
+   # 'JdSpider.middlewares.RandomProxyMiddlware': 400,
 }
 
 # Enable or disable extensions
@@ -71,11 +72,11 @@ ITEM_PIPELINES = {
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
-#AUTOTHROTTLE_ENABLED = True
+AUTOTHROTTLE_ENABLED = True
 # The initial download delay
-#AUTOTHROTTLE_START_DELAY = 5
+AUTOTHROTTLE_START_DELAY = 5
 # The maximum download delay to be set in case of high latencies
-#AUTOTHROTTLE_MAX_DELAY = 60
+AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
 #AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
@@ -98,38 +99,6 @@ MYSQL_PASSWORD = "root"
 
 import os
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
-CHROME_DRIVER_PATH = "{0}/driver/chromedriver.exe".format(ROOT_PATH)
+CHROME_DRIVER_PATH = "{0}/driver/chromedriver2_34.exe".format(ROOT_PATH)
 
 RANDOM_UA_TYPE = "random"
-
-NOT_ALLOW_URL = [
-   "bao.jd.com",
-   "baitiao",
-   "bk.jd.com",
-   "coin.jd.com",
-   "chat.jd.com",
-   "credit.jd.com",
-   "dang.jd.com",
-   "dcrz.jd.com",
-   "dq.jd.com",
-   "dj.jd.com",
-   "edu.jd.com",
-   "fund.jd.com",
-   "ft.jd.com",
-   "gupiao.jd.com",
-   "jc.jd.com",
-   "jr.jd.com",
-   "jrhelp.jd.com",
-   "jincai.jd.com",
-   "jimi.jd.com",
-   "licai.jd.com",
-   "licaishi.jd.com",
-   "loan.jd.com",
-   "nj.jd.com",
-   "pingce.jd.com",
-   "quant.jd.com",
-   "rich.jd.com",
-   "sale.jd.com",
-   "z.jd.com",
-   "zbbs.jd.com",
-]
