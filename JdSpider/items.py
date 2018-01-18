@@ -31,6 +31,38 @@ def isJself(value):
     else:
         return 0
 
+#
+# def get_book_dianpu_name(self, response):
+#     dianpu_name = response.xpath("//div[@class='seller-infor']/a/@title").extract()
+#     if not dianpu_name:
+#         dianpu_name.append("京东自营")
+#     return dianpu_name
+#
+# def get_dianpu_name(self, response):
+#     dianpu_name = response.xpath("//a[@clstag='shangpin|keycount|product|dianpuname1']/@title").extract()
+#     if not dianpu_name:
+#         dianpu_name.append("京东自营")
+#     return dianpu_name
+#
+# def get_jself(self, response):
+#     jself = response.css(".u-jd")
+#     if jself:
+#         return 1
+#     else:
+#         return 0
+#
+# def get_book_tag_list(self, response):
+#     tag_list = response.css(".breadcrumb a::text").extract()
+#     for i in range(4 - len(tag_list)):
+#         tag_list.append("...")
+#     return tag_list
+#
+# def get_tag_list(self, response):
+#     tag_list = response.css("#crumb-wrap .crumb a::text").extract()
+#     for i in range(4 - len(tag_list)):
+#         tag_list.append("...")
+#     return tag_list
+
 
 class JDItemLoader(ItemLoader):
     default_output_processor = TakeFirst()
@@ -50,10 +82,10 @@ class JdspiderItem(scrapy.Item):
     tag_3 = scrapy.Field()
     tag_4 = scrapy.Field()
     dianpu_name = scrapy.Field(
-        # input_processor=MapCompose(isJdBookStore)
+        input_processor=MapCompose(isJdBookStore)
     )
     jself = scrapy.Field(
-        # input_processor=MapCompose(isJself)
+        input_processor=MapCompose(isJself)
     )
     crawl_time = scrapy.Field()
 
