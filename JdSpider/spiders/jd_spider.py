@@ -25,22 +25,46 @@ class JdSpiderSpider(scrapy.Spider):
         dispatcher.connect(self.spider_close, signals.spider_closed)
 
         self.first = True
+        self.yieldNum = 0
+        self.yieldPNum = 0
 
     def spider_close(self):
         # 当爬虫退出的时候关闭chrome
         self.browser.close()
+
+    def yieldUrl(self, response):
+        all_urls = response.css("a::attr(href)").extract()
+        all_urls = [parse.urljoin(response.url, url) for url in all_urls]
+        new_urls = []
+        for url in all_urls:
+            m = re.match(".*javascript.*", url)
+            if not m:
+                new_urls.append(url)
+        for url in new_urls:
+            match_obj = re.match("(.*item.jd.com/(\d+).html.*)", url)
+            match_obj2 = re.match("(.*list.jd.com/.*)", url)
+            if match_obj:
+                # 如果提取到item相关的页面则下载后交由parse_item进行提取
+                request_url = match_obj.group(1)
+                item_id = match_obj.group(2)
+                # 通过yield返回给scrapy的下载器，另外一定要用request
+                self.yieldPNum += 1
+                yield scrapy.Request(request_url, meta={"item_id": item_id}, callback=self.parse_item, priority=1)
+            elif match_obj2:
+                yield scrapy.Request(request_url)
 
     def parse(self, response):
         """
         1. 提取出html页面中的所有url，并跟踪这些url进行异步爬取
         2. 如果提取的url中格式为/item.jd.com/xxx 就狭隘之后直接进入解析函数
         """
-        index_obj = re.match("(.*www.jd.com/(\d+).*)", response.url)
+        index_obj = re.match("(.*www.jd.com.*)", response.url)
         if index_obj and self.first:
             self.first = False
             all_urls = response.css(".cate_menu a::attr(href)").extract()
             all_urls = [parse.urljoin(response.url, url) for url in all_urls]
             for url in all_urls:
+                self.yieldNum += 1
                 yield scrapy.Request(url)
         else:
             all_urls = response.css("a::attr(href)").extract()
@@ -52,18 +76,20 @@ class JdSpiderSpider(scrapy.Spider):
                     new_urls.append(url)
             for url in new_urls:
                 match_obj = re.match("(.*item.jd.com/(\d+).html.*)", url)
+                match_obj2 = re.match("(.*list.jd.com/.*)", url)
                 if match_obj:
                     # 如果提取到item相关的页面则下载后交由parse_item进行提取
                     request_url = match_obj.group(1)
                     item_id = match_obj.group(2)
                     # 通过yield返回给scrapy的下载器，另外一定要用request
-                    yield scrapy.Request(request_url, meta={"item_id": item_id}, callback=self.parse_item)
-
-
+                    self.yieldPNum += 1
+                    yield scrapy.Request(request_url, meta={"item_id": item_id}, callback=self.parse_item, priority=1)
+                elif match_obj2:
+                    yield scrapy.Request(url)
 
     def parse_item(self, response):
-        item_loader = JDItemLoader(item=JdspiderItem(), response=response)
 
+        item_loader = JDItemLoader(item=JdspiderItem(), response=response)
         if (response.css(".breadcrumb")):
             # 图书类
             if not response.css(".m-itemover"):

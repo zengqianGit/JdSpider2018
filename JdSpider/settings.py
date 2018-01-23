@@ -93,7 +93,7 @@ AUTOTHROTTLE_MAX_DELAY = 60
 
 
 MYSQL_HOST = "localhost"
-MYSQL_DBNAME = "jd_spider"
+MYSQL_DBNAME = "jd_spider123"
 MYSQL_USER = "root"
 MYSQL_PASSWORD = "root"
 
@@ -102,3 +102,5 @@ ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 CHROME_DRIVER_PATH = "{0}/driver/chromedriver2_34.exe".format(ROOT_PATH)
 
 RANDOM_UA_TYPE = "random"
+
+# DEPTH_LIMIT = 5

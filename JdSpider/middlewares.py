@@ -67,7 +67,14 @@ class JSPageMiddleware(object):
         match_obj = re.match("(.*item.jd.com/(\d+).html.*)", request.url)
         if match_obj:
             spider.browser.get(request.url)
-            time.sleep(5)
+            s = """
+                window.scrollTo(0, document.body.scrollHeight); 
+                var lenOfPage=document.body.scrollHeight; 
+                return lenOfPage;
+            """
+            for i in range(3):
+                spider.browser.execute_script(s)
+                time.sleep(1)
             return HtmlResponse(url=spider.browser.current_url, body=spider.browser.page_source, encoding="utf8", request=request)
 
 
