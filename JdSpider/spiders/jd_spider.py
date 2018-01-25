@@ -15,12 +15,13 @@ class JdSpiderSpider(scrapy.Spider):
     allowed_domains = ['jd.com']
     start_urls = ['https://www.jd.com/']
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         # 初始化selenium加载页面用的browser
         chrome_opt = webdriver.ChromeOptions()
         prefs = {"profile.managed_default_content_settings.images": 2}
         chrome_opt.add_experimental_option("prefs", prefs)
         self.browser = webdriver.Chrome(executable_path=CHROME_DRIVER_PATH, chrome_options=chrome_opt)
+        # self.browser = webdriver.Chrome(executable_path=r"E:\Workspaces\OldSpider\JdSpider\JdSpider\driver\chromedriver2_34.exe", chrome_options=chrome_opt)
         super(JdSpiderSpider, self).__init__()
         dispatcher.connect(self.spider_close, signals.spider_closed)
 
@@ -32,31 +33,10 @@ class JdSpiderSpider(scrapy.Spider):
         # 当爬虫退出的时候关闭chrome
         self.browser.close()
 
-    def yieldUrl(self, response):
-        all_urls = response.css("a::attr(href)").extract()
-        all_urls = [parse.urljoin(response.url, url) for url in all_urls]
-        new_urls = []
-        for url in all_urls:
-            m = re.match(".*javascript.*", url)
-            if not m:
-                new_urls.append(url)
-        for url in new_urls:
-            match_obj = re.match("(.*item.jd.com/(\d+).html.*)", url)
-            match_obj2 = re.match("(.*list.jd.com/.*)", url)
-            if match_obj:
-                # 如果提取到item相关的页面则下载后交由parse_item进行提取
-                request_url = match_obj.group(1)
-                item_id = match_obj.group(2)
-                # 通过yield返回给scrapy的下载器，另外一定要用request
-                self.yieldPNum += 1
-                yield scrapy.Request(request_url, meta={"item_id": item_id}, callback=self.parse_item, priority=1)
-            elif match_obj2:
-                yield scrapy.Request(request_url)
-
     def parse(self, response):
         """
         1. 提取出html页面中的所有url，并跟踪这些url进行异步爬取
-        2. 如果提取的url中格式为/item.jd.com/xxx 就狭隘之后直接进入解析函数
+        2. 如果提取的url中格式为/item.jd.com/xxx 直接进入解析函数
         """
         index_obj = re.match("(.*www.jd.com.*)", response.url)
         if index_obj and self.first:
@@ -76,7 +56,6 @@ class JdSpiderSpider(scrapy.Spider):
                     new_urls.append(url)
             for url in new_urls:
                 match_obj = re.match("(.*item.jd.com/(\d+).html.*)", url)
-                match_obj2 = re.match("(.*list.jd.com/.*)", url)
                 if match_obj:
                     # 如果提取到item相关的页面则下载后交由parse_item进行提取
                     request_url = match_obj.group(1)
@@ -84,8 +63,9 @@ class JdSpiderSpider(scrapy.Spider):
                     # 通过yield返回给scrapy的下载器，另外一定要用request
                     self.yieldPNum += 1
                     yield scrapy.Request(request_url, meta={"item_id": item_id}, callback=self.parse_item, priority=1)
-                elif match_obj2:
-                    yield scrapy.Request(url)
+                elif re.match("(.*list.jd.com/.*)", url):
+                    if not re.match(".*&ev=.*", url):
+                        yield scrapy.Request(url)
 
     def parse_item(self, response):
 
@@ -163,13 +143,4 @@ class JdSpiderSpider(scrapy.Spider):
                   + response.css("#p-ad::text").extract_first("")
         return summary
 
-    # def not_allow_url(self, all_urls):
-    #     new_urls = list(all_urls)
-    #     for url in all_urls:
-    #         for nau in NOT_ALLOW_URL:
-    #             match_obj = re.match("(.*{0}.*)".format(nau), url)
-    #             if match_obj:
-    #                 new_urls.remove(url)
-    #                 break
-    #     new_urls = filter(lambda x: True if x.startswith("http") else False, new_urls)
-    #     return new_urls
+
