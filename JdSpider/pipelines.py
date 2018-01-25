@@ -32,10 +32,12 @@ class JdspiderPipeline(object):
     def process_item(self, item, spider):
         # 使用twisted将mysql插入变成异步执行
         query = self.dbpool.runInteraction(self.do_insert, item)
+        a = item["item_id"]
         query.addErrback(self.handle_error, item, spider)  # 处理异常
 
-    def handle_error(self, failure, item, spider):
+    def handle_error(self, failure, item):
         # 处理异步插入的异常
+        print(item["item_id"])
         print(failure)
 
     def do_insert(self, cursor, item):
