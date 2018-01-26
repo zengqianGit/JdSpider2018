@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from scrapy_redis.spiders import RedisSpider
 import scrapy
 from urllib import parse
 import re
@@ -10,10 +11,10 @@ from scrapy.xlib.pydispatch import dispatcher
 from scrapy import signals
 
 
-class JdSpiderSpider(scrapy.Spider):
+class JdSpiderSpider(RedisSpider):
     name = 'jd_spider'
+    redis_key = 'jd_spider:start_urls'
     allowed_domains = ['jd.com']
-    start_urls = ['https://www.jd.com/']
 
     def __init__(self, **kwargs):
         # 初始化selenium加载页面用的browser

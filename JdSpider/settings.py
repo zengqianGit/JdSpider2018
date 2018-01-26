@@ -66,9 +66,9 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-   'JdSpider.pipelines.JdspiderPipeline': 300,
-}
+# ITEM_PIPELINES = {
+#    'JdSpider.pipelines.JdspiderPipeline': 300,
+# }
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -93,22 +93,42 @@ AUTOTHROTTLE_MAX_DELAY = 60
 
 
 MYSQL_HOST = "localhost"
-MYSQL_DBNAME = "jd_spider124_2"
+MYSQL_DBNAME = "jd_spider125"
 MYSQL_USER = "root"
 MYSQL_PASSWORD = "root"
 
 import os
-import sys
 ROOT_PATH = os.path.dirname(os.path.abspath(__file__))
 CHROME_DRIVER_PATH = "{0}/driver/chromedriver2_34.exe".format(ROOT_PATH)
-
-
-# import sys
-# BASE_DIR = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
-# sys.path.insert(0, os.path.join(BASE_DIR, 'JdSpider'))
-
 
 
 RANDOM_UA_TYPE = "random"
 
 # DEPTH_LIMIT = 10
+
+
+# Enables scheduling storing requests queue in redis.
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+
+# Ensure all spiders share same duplicates filter through redis.
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+
+# Store scraped item in redis for post-processing.
+ITEM_PIPELINES = {
+    'scrapy_redis.pipelines.RedisPipeline': 300
+}
+
+REDIS_HOST = 'localhost'
+
+REDIS_PORT = 6379
+
+
+
+
+
+
+
+
+
+
+
