@@ -46,3 +46,11 @@ class JdspiderPipeline(object):
         insert_sql, params = item.get_insert_sql()
         cursor.execute(insert_sql, params)
         print ("cursor.execute(insert_sql, {0})".format(params))
+
+
+class ElasticsearchPipeline(object):
+    #将数据写入到es中
+    def process_item(self, item, spider):
+        #将item转换为es的数据
+        item.save_to_es()
+        return item
