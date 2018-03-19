@@ -21,21 +21,21 @@ ik_analyzer = CustomAnalyzer("ik_max_word", filter=["lowercase"])
 
 class JdSpiderType(DocType):
     suggest = Completion(analyzer=ik_analyzer)
-    title = Text(analyzer="ik_max_word")
-    create_date = Date()
-    url = Keyword()
-    url_object_id = Keyword()
-    front_image_url = Keyword()
-    front_image_path = Keyword()
-    praise_nums = Integer()
-    comment_nums = Integer()
-    fav_nums = Integer()
-    tags = Text(analyzer="ik_max_word")
-    content = Text(analyzer="ik_max_word")
+    item_id = Keyword()
+    name = Text(analyzer="ik_max_word")
+    summary = Text(analyzer="ik_max_word")
+    price = Integer()
+    tag_1 = Text(analyzer="ik_max_word")
+    tag_2 = Text(analyzer="ik_max_word")
+    tag_3 = Text(analyzer="ik_max_word")
+    tag_4 = Text(analyzer="ik_max_word")
+    dianpu_name = Text(analyzer="ik_max_word")
+    jself = Integer()
+    crawl_time = Date()
 
     class Meta:
-        index = "jd_spider"
-        doc_type = "jdspider"
+        index = "spider"
+        doc_type = "jd"
 
 
 if __name__ == "__main__":

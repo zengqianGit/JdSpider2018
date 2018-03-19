@@ -116,6 +116,7 @@ DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
 # Store scraped item in redis for post-processing.
 ITEM_PIPELINES = {
     'scrapy_redis.pipelines.RedisPipeline': 300
+    # 'JdSpider.pipelines.ElasticsearchPipeline': 300
 }
 
 REDIS_HOST = 'localhost'

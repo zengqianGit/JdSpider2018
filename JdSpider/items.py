@@ -124,23 +124,22 @@ class JdspiderItem(scrapy.Item):
         return insert_sql, params
 
     def save_to_es(self):
-        article = JdSpiderType()
-        article.title = self['title']
-        article.create_date = self["create_date"]
-        # article.content = remove_tags(self["content"])
-        article.front_image_url = self["front_image_url"]
-        if "front_image_path" in self:
-            article.front_image_path = self["front_image_path"]
-        article.praise_nums = self["praise_nums"]
-        article.fav_nums = self["fav_nums"]
-        article.comment_nums = self["comment_nums"]
-        article.url = self["url"]
-        article.tags = self["tags"]
-        article.meta.id = self["url_object_id"]
+        jd = JdSpiderType()
+        jd.item_id = self["item_id"]
+        jd.name = self["name"]
+        jd.summary = self["summary"]
+        jd.price = self["price"]
+        jd.tag_1 = self["tag_1"]
+        jd.tag_2 = self["tag_2"]
+        jd.tag_3 = self["tag_3"]
+        jd.tag_4 = self["tag_4"]
+        jd.dianpu_name = self["dianpu_name"]
+        jd.jself = self["jself"]
+        jd.crawl_time = self["crawl_time"]
 
-        article.suggest = gen_suggests(JdSpiderType._doc_type.index, ((article.title,10),(article.tags, 7)))
+        jd.suggest = gen_suggests(JdSpiderType._doc_type.index, ((jd.name,10),(jd.summary, 7)))
 
-        article.save()
+        jd.save()
         #
         # redis_cli.incr("jobbole_count")
 
