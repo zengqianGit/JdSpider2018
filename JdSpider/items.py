@@ -123,24 +123,24 @@ class JdspiderItem(scrapy.Item):
         print ("return insert_sql, params")
         return insert_sql, params
 
-    def save_to_es(self):
-        jd = JdSpiderType()
-        jd.item_id = self["item_id"]
-        jd.name = self["name"]
-        jd.summary = self["summary"]
-        jd.price = self["price"]
-        jd.tag_1 = self["tag_1"]
-        jd.tag_2 = self["tag_2"]
-        jd.tag_3 = self["tag_3"]
-        jd.tag_4 = self["tag_4"]
-        jd.dianpu_name = self["dianpu_name"]
-        jd.jself = self["jself"]
-        jd.crawl_time = self["crawl_time"]
-
-        jd.suggest = gen_suggests(JdSpiderType._doc_type.index, ((jd.name,10),(jd.summary, 7)))
-
-        jd.save()
-        #
-        # redis_cli.incr("jobbole_count")
-
-        return
+    # def save_to_es(self):
+    #     jd = JdSpiderType()
+    #     jd.item_id = self["item_id"]
+    #     jd.name = self["name"]
+    #     jd.summary = self["summary"]
+    #     jd.price = self["price"]
+    #     jd.tag_1 = self["tag_1"]
+    #     jd.tag_2 = self["tag_2"]
+    #     jd.tag_3 = self["tag_3"]
+    #     jd.tag_4 = self["tag_4"]
+    #     jd.dianpu_name = self["dianpu_name"]
+    #     jd.jself = self["jself"]
+    #     jd.crawl_time = self["crawl_time"]
+    #
+    #     jd.suggest = gen_suggests(JdSpiderType._doc_type.index, ((jd.name,10),(jd.summary, 7)))
+    #
+    #     jd.save()
+    #     #
+    #     # redis_cli.incr("jobbole_count")
+    #
+    #     return

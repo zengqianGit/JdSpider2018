@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-__author__ = 'bobby'
 
 from datetime import datetime
 from elasticsearch_dsl import DocType, Date, Nested, Boolean, \
