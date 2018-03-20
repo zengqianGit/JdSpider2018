@@ -68,45 +68,77 @@ class JdSpiderSpider(RedisSpider):
                     if not re.match(".*&ev=.*", url):
                         yield scrapy.Request(url)
 
+        # 对单个网站测试
+        # match_obj = re.match("(.*item.jd.com/(\d+).html.*)", response.url)
+        # item_id = match_obj.group(2)
+        # yield scrapy.Request(response.url, meta={"item_id": item_id}, callback=self.parse_item, priority=1)
+
     def parse_item(self, response):
 
         item_loader = JDItemLoader(item=JdspiderItem(), response=response)
-        if (response.css(".breadcrumb")):
-            # 图书类
-            if not response.css(".m-itemover"):
-                # 是否下架
-                tag_list = self.get_book_tag_list(response=response)
-                item_loader.add_value("item_id", response.meta.get("item_id", "unknow"))
-                item_loader.add_css("name", "#name h1::text")
-                item_loader.add_value("summary", self.get_summary(response=response))  # js加载
-                item_loader.add_css("price", "#jd-price::text")  # js加载
-                item_loader.add_value("tag_1", tag_list[0])
-                item_loader.add_value("tag_2", tag_list[1])
-                item_loader.add_value("tag_3", tag_list[2])
-                item_loader.add_value("tag_4", tag_list[3])
-                item_loader.add_value("dianpu_name", self.get_book_dianpu_name(response=response))
-                item_loader.add_value("jself", self.get_jself(response=response))
-                item_loader.add_value("crawl_time", datetime.datetime.now())
-        elif(response.css("#crumb-wrap")):
-            # 非图书类，且没有被重定向到首页
-            if not response.css(".itemover"):
-                # 是否下架
-                tag_list = self.get_tag_list(response=response)
-                item_loader.add_value("item_id", response.meta.get("item_id", "unknow"))
-                item_loader.add_css("name", ".ellipsis::attr(title)")
-                item_loader.add_css("summary", ".sku-name::text")
-                item_loader.add_css("price", ".summary-price-wrap .price::text")
-                item_loader.add_value("tag_1", tag_list[0])
-                item_loader.add_value("tag_2", tag_list[1])
-                item_loader.add_value("tag_3", tag_list[2])
-                item_loader.add_value("tag_4", tag_list[3])
-                item_loader.add_value("dianpu_name", self.get_dianpu_name(response=response))
-                item_loader.add_value("jself", self.get_jself(response=response))
-                item_loader.add_value("crawl_time", datetime.datetime.now())
+        item_id = response.meta.get("item_id", "")
+        e = False
+        if item_id:
+            if (response.css(".breadcrumb")):
+                # 图书类
+                if not response.css(".m-itemover"):
+                    # 是否下架
+                    tag_list = self.get_book_tag_list(response=response)
+                    item_loader.add_value("item_id", item_id)
+                    item_loader.add_css("name", "#name h1::text")
+                    item_loader.add_value("summary", self.get_summary(response=response))  # js加载
+                    item_loader.add_value("price", self.get_a_price(response=response)) # js加载
+                    item_loader.add_value("tag_1", tag_list[0])
+                    item_loader.add_value("tag_2", tag_list[1])
+                    item_loader.add_value("tag_3", tag_list[2])
+                    item_loader.add_value("tag_4", tag_list[3])
+                    item_loader.add_value("dianpu_name", self.get_book_dianpu_name(response=response))
+                    item_loader.add_value("jself", self.get_jself(response=response))
+                    item_loader.add_value("crawl_time", datetime.datetime.now())
+                    e = True
+            elif(response.css("#crumb-wrap")):
+                # 非图书类，且没有被重定向到首页
+                if not response.css(".itemover"):
+                    # 是否下架
+                    tag_list = self.get_tag_list(response=response)
+                    item_loader.add_value("item_id", item_id)
+                    item_loader.add_css("name", ".ellipsis::attr(title)")
+                    item_loader.add_css("summary", ".sku-name::text")
+                    # item_loader.add_css("price", ".summary-price-wrap .price::text")
+                    item_loader.add_value("price", self.get_b_price(response=response))
+                    item_loader.add_value("tag_1", tag_list[0])
+                    item_loader.add_value("tag_2", tag_list[1])
+                    item_loader.add_value("tag_3", tag_list[2])
+                    item_loader.add_value("tag_4", tag_list[3])
+                    item_loader.add_value("dianpu_name", self.get_dianpu_name(response=response))
+                    item_loader.add_value("jself", self.get_jself(response=response))
+                    item_loader.add_value("crawl_time", datetime.datetime.now())
+                    e = True
+            if e:
+                jd_item = item_loader.load_item()
+                print("return jd_item")
+                return jd_item
 
-        jd_item = item_loader.load_item()
-        print("return jd_item")
-        return jd_item
+    def get_a_price(self, response):
+        price = response.css("#jd-price::text").extract()[0]
+        if "￥" in price:
+            price = price.replace("￥", "")
+        try:
+            price = float(price)
+        except:
+            price = 0
+        return price
+
+    def get_b_price(self, response):
+        itemId = response.meta.get("item_id", "")
+        price = response.css(".J-p-{0}::text".format(itemId)).extract()[0]
+        if "￥" in price:
+            price = price.replace("￥", "")
+        try:
+            price = float(price)
+        except:
+            price = 0
+        return price
 
     def get_book_dianpu_name(self, response):
         dianpu_name = response.xpath("//div[@class='seller-infor']/a/@title").extract()

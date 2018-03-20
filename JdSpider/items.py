@@ -9,17 +9,24 @@ import scrapy
 from scrapy.loader import ItemLoader
 from scrapy.loader.processors import MapCompose, TakeFirst, Join
 from JdSpider.models.es_types import JdSpiderType
-
-
+import redis
 from elasticsearch_dsl.connections import connections
+
 es = connections.create_connection(JdSpiderType._doc_type.using)
+redis_cli = redis.StrictRedis()
+
 
 def handle_strip(value):
     return value.strip()
 
 
 def price(value):
-    return float(value.replace("￥", ""))
+    # return float(value.replace("￥", ""))
+    try:
+        value = float(value)
+    except:
+        value = -1
+    return value
 
 
 def isJdBookStore(value):
@@ -35,23 +42,6 @@ def isJself(value):
     else:
         return 0
 
-def gen_suggests(index, info_tuple):
-    #根据字符串生成搜索建议数组
-    used_words = set()
-    suggests = []
-    for text, weight in info_tuple:
-        if text:
-            #调用es的analyze接口分析字符串
-            words = es.indices.analyze(index=index, analyzer="ik_max_word", params={'filter':["lowercase"]}, body=text)
-            anylyzed_words = set([r["token"] for r in words["tokens"] if len(r["token"])>1])
-            new_words = anylyzed_words - used_words
-        else:
-            new_words = set()
-
-        if new_words:
-            suggests.append({"input":list(new_words), "weight":weight})
-
-    return suggests
 #
 # def get_book_dianpu_name(self, response):
 #     dianpu_name = response.xpath("//div[@class='seller-infor']/a/@title").extract()
@@ -95,9 +85,7 @@ class JdspiderItem(scrapy.Item):
     summary = scrapy.Field(
         input_processor=MapCompose(handle_strip)
     )
-    price = scrapy.Field(
-        input_processor=MapCompose(price)
-    )
+    price = scrapy.Field()
     tag_1 = scrapy.Field()
     tag_2 = scrapy.Field()
     tag_3 = scrapy.Field()
@@ -123,24 +111,3 @@ class JdspiderItem(scrapy.Item):
         print ("return insert_sql, params")
         return insert_sql, params
 
-    # def save_to_es(self):
-    #     jd = JdSpiderType()
-    #     jd.item_id = self["item_id"]
-    #     jd.name = self["name"]
-    #     jd.summary = self["summary"]
-    #     jd.price = self["price"]
-    #     jd.tag_1 = self["tag_1"]
-    #     jd.tag_2 = self["tag_2"]
-    #     jd.tag_3 = self["tag_3"]
-    #     jd.tag_4 = self["tag_4"]
-    #     jd.dianpu_name = self["dianpu_name"]
-    #     jd.jself = self["jself"]
-    #     jd.crawl_time = self["crawl_time"]
-    #
-    #     jd.suggest = gen_suggests(JdSpiderType._doc_type.index, ((jd.name,10),(jd.summary, 7)))
-    #
-    #     jd.save()
-    #     #
-    #     # redis_cli.incr("jobbole_count")
-    #
-    #     return
